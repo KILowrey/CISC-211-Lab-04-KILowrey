@@ -66,7 +66,107 @@ asmFunc:
 .endif
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
-
+    
+    /* ALL OUR REGSITERS ARE AS FOLLOWS
+     * R0 - for user input/output
+     * R1 - balance
+     * R2 - transaction
+     * R3 - eat_out
+     * R4 - stay_in
+     * R5 - eat_ice_cream
+     * R6 - we_have_a_problem
+     * R7 - tmpBalance
+     * R8 - scratch pad 1
+     * R9 - scratch pad 2
+     * R10 - stores 0
+     * R11 - stores 1 for easy ADDS to reset flags
+     * R12 - stores result of our easy ADDS
+     */
+    
+    /* reset our flags */
+    LDR R11,=1
+    ADDS R12,R11,R11
+    
+    /* set each output variable to a register */
+    LDR R1,=balance
+    LDR R2,=transaction
+    LDR R3,=eat_out
+    LDR R4,=stay_in
+    LDR R5,=eat_ice_cream
+    LDR R6,=we_have_a_problem
+    
+    /* set output variables to 0 (except for balance) */
+    LDR R10,=0
+    STR R10,[R2]
+    STR R10,[R3]
+    STR R10,[R4]
+    STR R10,[R5]
+    STR R10,[R6]
+    
+    /* copy R0 to transaction */
+    STR R0,[R2]
+    
+    /* loading scratch pad registers */
+    LDR R8,=1000
+    LDR R9,=-1000
+    /* check if value put in transaction is greater than 1000 */
+    CMP R0,R8
+    /* and if so branch to not_acceptable */
+    BGT not_acceptable
+    /* check if value put in transation is less than -1000 */
+    CMP R0,R9
+    /* and if so branch to not_acceptable */
+    BLT not_acceptable
+    
+    /* R7 is gonna be tmpBalance
+     * tmpBalance is = balance + transation
+     */
+    LDR R8,[R1]
+    LDR R9,[R2]
+    ADDS R7,R8,R9
+    /* check for overflow and skip to not_acceptable if the case */
+    BVS not_acceptable
+    
+    /* set balance to our calculated tempBalance */
+    STR R7,[R1]
+    
+    /* reset flags just in case */
+    ADDS R12,R11,R11
+    
+    /* compare balance to 0 */
+    LDR R8,[R1]
+    CMP R8,R10
+    /* if it's larger than 0, set eat_out to 1 */
+    STRGT R11,[R3]
+    /* if it's small than 0, set stay_in to 1 */
+    STRLT R11,[R4]
+    /* as long as it's not 0, branch to almost_done */
+    BNE almost_done
+    
+    /* if it is 0, eat_ice_cream = 1 & branch to almost_done */
+    STR R11,[R5]
+    B almost_done
+    
+/* not_accptable branch 
+ * for if transaction is... not_acceptable 
+ */   
+not_acceptable:
+    /* transaction = 0 */
+    STR R10,[R2]
+    /* we_have_a_problem = 1 */
+    STR R11,[R6]
+    /* set R0 to our balance */
+    LDR R0,[R1]
+    /* after this we go to done 
+     * skipping over almost_done
+     */
+    B done
+    
+/* almost done branch */
+almost_done:
+    /* load our balance into R0*/
+    LDR R0,[R1]
+    /* no need ot branch to done as that's the next line anyways */
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
